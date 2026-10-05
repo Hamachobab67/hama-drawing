@@ -7,10 +7,12 @@
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#fff;color:#222;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-.wrap{width:min(94vw,760px);margin:auto;padding:40px 0 60px;text-align:center}
+.wrap{width:min(94vw,1100px);margin:auto;padding:40px 0 60px;text-align:center}
 h1{margin:0;font-size:34px;letter-spacing:-1.5px}
-.sub{margin:8px 0 22px;color:#777;font-size:15px}
-.board{width:min(94vw,680px);aspect-ratio:1;margin:auto;border:1px solid #e6e6e6;border-radius:20px;overflow:hidden;background:#fafafa;touch-action:none}
+.sub{margin:8px 0 28px;color:#777;font-size:15px}
+.game-layout{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:28px;align-items:start;text-align:center}
+.left-panel{min-width:0}
+.board{width:min(100%,680px);aspect-ratio:1;margin:auto;border:1px solid #e6e6e6;border-radius:20px;overflow:hidden;background:#fafafa;touch-action:none}
 canvas{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair}
 .tools{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin:15px auto 0}
 .tool{display:flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid #e3e3e3;border-radius:12px;background:#fff;font-size:13px;color:#555}
@@ -20,58 +22,93 @@ button{border:1px solid #ddd;background:#fff;border-radius:12px;padding:12px 19p
 button.primary{background:#222;color:#fff;border-color:#222}
 button:disabled{opacity:.4;cursor:not-allowed}
 .buttons{display:flex;gap:10px;justify-content:center;margin-top:12px;flex-wrap:wrap}
-.result{margin:22px auto 0;padding:20px;border:1px solid #eee;border-radius:16px;max-width:470px;background:#fff}
+.right-panel{min-width:0}
+.result{margin:0 0 18px;padding:20px;border:1px solid #eee;border-radius:16px;background:#fff}
 .score{font-size:50px;font-weight:850;line-height:1.05;margin:4px 0 10px}
 .bar{height:9px;background:#eee;border-radius:99px;overflow:hidden}
 .fill{height:100%;width:0;background:#222;transition:width .35s}
 .msg{margin-top:10px;color:#777;font-size:14px}
-.records{margin:18px auto 0;max-width:470px;text-align:left;border-top:1px solid #eee;padding-top:16px}
+.records{margin:0;text-align:left;border:1px solid #eee;border-radius:16px;padding:16px;background:#fff}
 .records h2{font-size:15px;margin:0 0 8px}
 .record-row{display:flex;justify-content:space-between;padding:7px 0;color:#666;font-size:13px}
 .note{margin-top:15px;color:#aaa;font-size:12px}
+
+@media (max-width:860px){
+  .wrap{width:min(94vw,680px);padding-top:28px}
+  .game-layout{grid-template-columns:1fr;gap:22px}
+  .right-panel{width:100%}
+  .result{margin-bottom:14px}
+}
+
+@media (max-width:520px){
+  h1{font-size:28px}
+  .sub{font-size:14px;margin-bottom:20px}
+  .board{border-radius:16px}
+  .buttons button{padding:11px 14px;font-size:14px}
+  .score{font-size:44px}
+}
 </style>
 </head>
+
 <body>
 <main class="wrap">
+
   <h1>🦛 HAMA DRAWING</h1>
   <div class="sub">우주하마의 외곽선을 따라 그려보세요!</div>
 
-  <div class="board">
-    <canvas id="c" width="840" height="840" aria-label="우주하마 따라그리기"></canvas>
-  </div>
+  <div class="game-layout">
 
-  <div class="tools">
-    <div class="tool">
-      <span>펜 색</span>
-      <input id="color" type="color" value="#7092BE" aria-label="펜 색상">
-      <input id="hex" type="text" value="#7092BE" maxlength="7" aria-label="색상 코드">
+    <div class="left-panel">
+
+      <div class="board">
+        <canvas id="c" width="840" height="840" aria-label="우주하마 따라그리기"></canvas>
+      </div>
+
+      <div class="tools">
+        <div class="tool">
+          <span>펜 색</span>
+          <input id="color" type="color" value="#7092BE" aria-label="펜 색상">
+          <input id="hex" type="text" value="#7092BE" maxlength="7" aria-label="색상 코드">
+        </div>
+        <button type="button" id="preset">청회색 #7092BE</button>
+      </div>
+
+      <div class="buttons">
+        <button type="button" id="clear">다시 그리기</button>
+        <button type="button" id="grade" class="primary" disabled>채점하기</button>
+        <button type="button" id="save" disabled>내 그림 저장하기</button>
+      </div>
+
     </div>
-    <button type="button" id="preset">청회색 #7092BE</button>
+
+    <div class="right-panel">
+
+      <section class="result" id="result" hidden aria-live="polite">
+        <div>우주하마 싱크로율</div>
+        <div class="score" id="score">0.0점</div>
+        <div class="bar">
+          <div class="fill" id="fill"></div>
+        </div>
+        <div class="msg" id="msg"></div>
+      </section>
+
+      <section class="records" id="records">
+        <h2>내 기록</h2>
+        <div id="recordList"></div>
+      </section>
+
+    </div>
+
   </div>
-
-  <div class="buttons">
-    <button type="button" id="clear">다시 그리기</button>
-    <button type="button" id="grade" class="primary" disabled>채점하기</button>
-    <button type="button" id="save" disabled>내 그림 저장 PNG</button>
-  </div>
-
-  <section class="result" id="result" hidden aria-live="polite">
-    <div>우주하마 싱크로율</div>
-    <div class="score" id="score">0.0점</div>
-    <div class="bar"><div class="fill" id="fill"></div></div>
-    <div class="msg" id="msg"></div>
-  </section>
-
-  <section class="records" id="records">
-    <h2>내 기록</h2>
-    <div id="recordList"></div>
-  </section>
 
   <div class="note">저장한 PNG에는 가이드라인이 포함되지 않습니다.</div>
+
 </main>
 
 <script>
+
 const ref = [[323.0,559.529],[319.919,557.601],[316.88,555.608],[313.881,553.556],[310.914,551.458],[307.977,549.316],[305.09,547.11],[302.246,544.848],[299.451,542.525],[296.704,540.145],[294.02,537.695],[291.395,535.182],[288.825,532.612],[286.319,529.981],[283.889,527.279],[281.543,524.503],[279.271,521.667],[277.092,518.758],[275.008,515.781],[273.011,512.745],[271.096,509.656],[269.274,506.512],[267.526,503.326],[265.844,500.104],[264.221,496.853],[262.639,493.581],[261.091,490.293],[259.585,486.986],[258.111,483.664],[256.679,480.324],[255.285,476.967],[253.934,473.593],[252.628,470.202],[251.371,466.792],[250.192,463.355],[249.1,459.889],[248.083,456.399],[247.15,452.887],[246.293,449.356],[245.489,445.811],[244.761,442.251],[244.081,438.681],[243.445,435.103],[242.841,431.519],[242.234,427.936],[241.656,424.348],[241.098,420.757],[240.57,417.161],[240.109,413.557],[239.705,409.945],[239.314,406.332],[238.944,402.716],[238.55,399.104],[238.106,395.497],[237.652,391.891],[237.194,388.286],[236.793,384.674],[236.454,381.055],[236.221,377.429],[236.088,373.797],[236.016,370.164],[236.0,366.529],[236.0,362.895],[235.921,359.262],[235.518,355.653],[234.368,352.221],[231.923,349.588],[228.59,348.177],[225.022,347.502],[221.402,347.182],[217.777,346.924],[214.159,346.586],[210.558,346.094],[206.993,345.394],[203.495,344.412],[200.11,343.094],[196.896,341.402],[193.922,339.319],[191.245,336.865],[188.895,334.096],[186.909,331.057],[185.353,327.775],[184.228,324.322],[183.539,320.757],[183.246,317.136],[183.253,313.502],[183.512,309.878],[184.013,306.279],[184.666,302.704],[185.436,299.153],[186.295,295.622],[187.263,292.119],[188.409,288.671],[189.849,285.336],[191.676,282.198],[193.84,279.28],[196.295,276.603],[198.954,274.127],[201.728,271.778],[204.589,269.539],[207.531,267.405],[210.548,265.38],[213.643,263.475],[216.828,261.726],[220.102,260.15],[223.452,258.741],[226.862,257.487],[230.332,256.408],[233.841,255.46],[237.371,254.599],[240.923,253.829],[244.483,253.101],[248.052,252.413],[251.633,251.795],[255.216,251.187],[258.805,250.613],[262.394,250.041],[265.984,249.478],[269.578,248.937],[273.173,248.406],[276.77,247.89],[280.369,247.38],[283.969,246.884],[287.57,246.393],[291.176,245.943],[294.782,245.494],[298.391,245.06],[301.999,244.627],[305.605,244.174],[309.211,243.725],[312.818,243.275],[316.429,242.868],[320.04,242.462],[323.655,242.083],[327.274,241.753],[330.895,241.44],[334.522,241.221],[338.154,241.089],[341.787,240.992],[345.42,240.894],[349.051,240.753],[352.68,240.553],[356.307,240.33],[359.938,240.162],[363.57,240.044],[367.202,239.931],[370.834,239.807],[374.464,239.618],[378.086,239.33],[381.708,239.025],[385.329,238.719],[388.951,238.421],[392.579,238.219],[396.211,238.088],[399.845,238.015],[403.479,238.0],[407.113,238.0],[410.747,238.0],[414.382,238.0],[418.016,238.0],[421.65,238.0],[425.284,238.0],[428.919,238.0],[432.553,238.021],[436.186,238.099],[439.818,238.236],[443.447,238.432],[447.074,238.657],[450.704,238.828],[454.336,238.941],[457.97,238.995],[461.604,238.997],[465.238,238.95],[468.87,238.832],[472.497,238.6],[476.112,238.226],[479.715,237.755],[483.308,237.21],[486.899,236.651],[490.491,236.095],[494.073,235.483],[497.632,234.747],[501.17,233.917],[504.69,233.015],[508.223,232.164],[511.805,231.553],[515.413,231.126],[519.037,230.856],[522.667,230.671],[526.294,230.448],[529.923,230.248],[533.554,230.11],[537.188,230.073],[540.821,230.154],[544.452,230.317],[548.079,230.538],[551.708,230.741],[555.339,230.886],[558.972,230.986],[562.605,231.083],[566.236,231.227],[569.861,231.49],[573.469,231.918],[577.057,232.495],[580.614,233.241],[584.137,234.132],[587.627,235.145],[591.093,236.235],[594.535,237.401],[597.943,238.663],[601.312,240.025],[604.6,241.573],[607.759,243.366],[610.74,245.442],[613.462,247.847],[615.844,250.587],[617.785,253.654],[619.206,256.994],[620.12,260.509],[620.631,264.105],[620.836,267.733],[620.857,271.367],[620.742,274.999],[620.464,278.622],[620.045,282.232],[619.505,285.826],[618.798,289.39],[617.94,292.922],[616.946,296.417],[615.802,299.866],[614.531,303.271],[613.092,306.607],[611.372,309.806],[609.259,312.758],[606.644,315.271],[603.565,317.19],[600.215,318.594],[596.768,319.745],[593.366,321.019],[590.263,322.889],[588.044,325.726],[587.08,329.214],[586.848,332.838],[586.893,336.472],[586.975,340.105],[587.0,343.739],[587.0,347.374],[587.0,351.008],[587.0,354.642],[587.0,358.276],[587.0,361.911],[587.0,365.545],[587.0,369.179],[587.0,372.813],[586.981,376.447],[586.904,380.081],[586.765,383.712],[586.523,387.338],[586.186,390.957],[585.796,394.57],[585.336,398.175],[584.837,401.775],[584.286,405.367],[583.671,408.949],[582.998,412.52],[582.276,416.082],[581.497,419.631],[580.665,423.169],[579.777,426.693],[578.824,430.2],[577.812,433.69],[576.748,437.165],[575.628,440.623],[574.45,444.06],[573.217,447.479],[571.95,450.885],[570.643,454.277],[569.314,457.659],[567.957,461.03],[566.556,464.384],[565.102,467.714],[563.58,471.014],[561.972,474.274],[560.29,477.495],[558.534,480.676],[556.717,483.824],[554.833,486.932],[552.897,490.007],[550.9,493.043],[548.837,496.035],[546.719,498.989],[544.57,501.92],[542.391,504.828],[540.209,507.734],[538.033,510.645],[535.855,513.554],[533.648,516.441],[531.397,519.295],[529.085,522.098],[526.697,524.837],[524.226,527.503],[521.69,530.105],[519.088,532.642],[516.417,535.106],[513.672,537.489],[510.867,539.799],[508.004,542.037],[505.086,544.204],[502.12,546.303],[499.108,548.337],[496.043,550.289],[492.914,552.137],[489.713,553.858],[486.461,555.479],[483.169,557.02],[479.853,558.506],[476.529,559.976],[473.198,561.43],[469.844,562.828],[466.465,564.167],[463.056,565.424],[459.617,566.599],[456.166,567.74],[452.719,568.892],[449.29,570.095],[445.883,571.36],[442.489,572.658],[439.08,573.918],[435.635,575.074],[432.138,576.062],[428.584,576.816],[424.991,577.361],[421.373,577.702],[417.744,577.884],[414.111,577.971],[410.476,578.0],[406.842,578.0],[403.208,578.0],[399.574,578.0],[395.94,578.0],[392.305,578.0],[388.671,577.967],[385.038,577.877],[381.407,577.724],[377.782,577.47],[374.163,577.136],[370.552,576.729],[366.959,576.184],[363.389,575.504],[359.853,574.668],[356.356,573.679],[352.885,572.603],[349.435,571.46],[346.001,570.271],[342.585,569.032],[339.196,567.718],[335.847,566.309],[332.551,564.778],[329.309,563.137],[326.126,561.383]];
+
 const canvas = document.getElementById("c");
 const ctx = canvas.getContext("2d");
 const clearBtn = document.getElementById("clear");
@@ -93,7 +130,9 @@ let pointerId = null;
 let penColor = "#7092BE";
 let lastScore = null;
 
-function validHex(v) { return /^#[0-9a-fA-F]{6}$/.test(v); }
+function validHex(v) {
+  return /^#[0-9a-fA-F]{6}$/.test(v);
+}
 
 function setColor(v) {
   if (!validHex(v)) return;
@@ -104,16 +143,19 @@ function setColor(v) {
 }
 
 colorInput.addEventListener("input", () => setColor(colorInput.value));
+
 hexInput.addEventListener("change", () => {
   let v = hexInput.value.trim();
   if (v[0] !== "#") v = "#" + v;
   if (validHex(v)) setColor(v);
   else hexInput.value = penColor;
 });
+
 presetBtn.addEventListener("click", () => setColor("#7092BE"));
 
 function draw() {
   ctx.clearRect(0,0,840,840);
+
   ctx.save();
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
@@ -122,202 +164,471 @@ function draw() {
   ctx.lineWidth = 5;
   ctx.setLineDash([7,8]);
   ctx.beginPath();
-  ref.forEach((p,i) => i ? ctx.lineTo(p[0],p[1]) : ctx.moveTo(p[0],p[1]));
+
+  ref.forEach((p,i) =>
+    i ? ctx.lineTo(p[0],p[1]) : ctx.moveTo(p[0],p[1])
+  );
+
   ctx.closePath();
   ctx.stroke();
   ctx.setLineDash([]);
 
   ctx.strokeStyle = penColor;
   ctx.lineWidth = 5;
+
   for (const s of strokes) {
     ctx.beginPath();
-    s.forEach((p,i) => i ? ctx.lineTo(p.x,p.y) : ctx.moveTo(p.x,p.y));
+    s.forEach((p,i) =>
+      i ? ctx.lineTo(p.x,p.y) : ctx.moveTo(p.x,p.y)
+    );
     ctx.stroke();
   }
+
   if (current.length) {
     ctx.beginPath();
-    current.forEach((p,i) => i ? ctx.lineTo(p.x,p.y) : ctx.moveTo(p.x,p.y));
+    current.forEach((p,i) =>
+      i ? ctx.lineTo(p.x,p.y) : ctx.moveTo(p.x,p.y)
+    );
     ctx.stroke();
   }
+
   ctx.restore();
 }
 
 function pos(e) {
   const r = canvas.getBoundingClientRect();
-  return {x:(e.clientX-r.left)*840/r.width, y:(e.clientY-r.top)*840/r.height};
+  return {
+    x:(e.clientX-r.left)*840/r.width,
+    y:(e.clientY-r.top)*840/r.height
+  };
 }
+
 function down(e) {
   if (drawing) return;
-  drawing=true; pointerId=e.pointerId; current=[pos(e)];
+
+  drawing=true;
+  pointerId=e.pointerId;
+  current=[pos(e)];
+
   canvas.setPointerCapture(pointerId);
-  result.hidden=true; gradeBtn.disabled=false; saveBtn.disabled=false;
+
+  result.hidden=true;
+  gradeBtn.disabled=false;
+  saveBtn.disabled=false;
+
   draw();
 }
+
 function move(e) {
   if (!drawing || e.pointerId!==pointerId) return;
-  const p=pos(e), q=current[current.length-1];
-  if (Math.hypot(p.x-q.x,p.y-q.y)>=1.5) current.push(p);
+
+  const p=pos(e);
+  const q=current[current.length-1];
+
+  if (Math.hypot(p.x-q.x,p.y-q.y)>=1.5) {
+    current.push(p);
+  }
+
   draw();
 }
+
 function up(e) {
   if (!drawing || e.pointerId!==pointerId) return;
+
   drawing=false;
-  if (current.length>2) strokes.push(current);
-  current=[]; pointerId=null; draw();
+
+  if (current.length>2) {
+    strokes.push(current);
+  }
+
+  current=[];
+  pointerId=null;
+
+  draw();
 }
 
 function pathLength(path) {
   let d=0;
-  for(let i=1;i<path.length;i++) d+=Math.hypot(path[i].x-path[i-1].x,path[i].y-path[i-1].y);
+
+  for(let i=1;i<path.length;i++) {
+    d+=Math.hypot(
+      path[i].x-path[i-1].x,
+      path[i].y-path[i-1].y
+    );
+  }
+
   return d;
 }
+
 function closedRefLength() {
   let d=0;
+
   for(let i=0;i<ref.length;i++) {
-    const a=ref[i], b=ref[(i+1)%ref.length];
-    d+=Math.hypot(b[0]-a[0],b[1]-a[1]);
+    const a=ref[i];
+    const b=ref[(i+1)%ref.length];
+
+    d+=Math.hypot(
+      b[0]-a[0],
+      b[1]-a[1]
+    );
   }
+
   return d;
 }
+
 function resampleOpen(path,n) {
   if(path.length<2) return [];
-  const lens=[0]; let total=0;
+
+  const lens=[0];
+  let total=0;
+
   for(let i=1;i<path.length;i++) {
-    total+=Math.hypot(path[i].x-path[i-1].x,path[i].y-path[i-1].y);
+    total+=Math.hypot(
+      path[i].x-path[i-1].x,
+      path[i].y-path[i-1].y
+    );
+
     lens.push(total);
   }
+
   if(total<=0) return [];
+
   const out=[];
+
   for(let k=0;k<n;k++) {
     const target=total*k/(n-1);
+
     let i=1;
-    while(i<lens.length && lens[i]<target) i++;
+
+    while(i<lens.length && lens[i]<target) {
+      i++;
+    }
+
     i=Math.min(i,lens.length-1);
-    const a=path[i-1],b=path[i];
+
+    const a=path[i-1];
+    const b=path[i];
+
     const seg=lens[i]-lens[i-1];
-    const t=seg?(target-lens[i-1])/seg:0;
-    out.push({x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t});
+    const t=seg ? (target-lens[i-1])/seg : 0;
+
+    out.push({
+      x:a.x+(b.x-a.x)*t,
+      y:a.y+(b.y-a.y)*t
+    });
   }
+
   return out;
 }
+
 function cyclicError(u,r,reverse) {
   const n=r.length;
   let best=Infinity;
+
   for(let shift=0;shift<n;shift++) {
     let sum=0;
+
     for(let i=0;i<n;i++) {
-      const j=reverse ? (shift-i+n*2)%n : (shift+i)%n;
-      sum += Math.hypot(u[i].x-r[j][0],u[i].y-r[j][1]);
+      const j=reverse
+        ? (shift-i+n*2)%n
+        : (shift+i)%n;
+
+      sum += Math.hypot(
+        u[i].x-r[j][0],
+        u[i].y-r[j][1]
+      );
     }
+
     best=Math.min(best,sum/n);
   }
+
   return best;
 }
 
 function grade() {
   const user=strokes.flat();
+
   if(user.length<30) {
-    scoreEl.textContent="—"; fill.style.width="0%";
+    scoreEl.textContent="—";
+    fill.style.width="0%";
     msg.textContent="외곽선을 조금 더 따라 그려주세요.";
-    result.hidden=false; return;
+    result.hidden=false;
+    return;
   }
 
   const u=resampleOpen(user,360);
   const r=ref;
+
   const e1=cyclicError(u,r,false);
   const e2=cyclicError(u,r,true);
   const shapeErr=Math.min(e1,e2);
 
-  // 기준선의 각 지점이 사용자 선에 얼마나 가까운지도 별도로 확인
   let coverageErr=0;
-  const step=Math.max(1,Math.floor(user.length/360));
+
+  const step=Math.max(
+    1,
+    Math.floor(user.length/360)
+  );
+
   for(let i=0;i<user.length;i+=step) {
     let best=Infinity;
-    for(const p of r) best=Math.min(best,Math.hypot(user[i].x-p[0],user[i].y-p[1]));
+
+    for(const p of r) {
+      best=Math.min(
+        best,
+        Math.hypot(
+          user[i].x-p[0],
+          user[i].y-p[1]
+        )
+      );
+    }
+
     coverageErr+=best;
   }
+
   coverageErr/=Math.ceil(user.length/step);
 
-  const lengthScore=Math.max(0,1-Math.abs(pathLength(user)-closedRefLength())/closedRefLength());
-  const shapeScore=Math.max(0,1-shapeErr/55);
-  const coverageScore=Math.max(0,1-coverageErr/55);
+  const lengthScore=Math.max(
+    0,
+    1-Math.abs(
+      pathLength(user)-closedRefLength()
+    )/closedRefLength()
+  );
 
-  const raw=(shapeScore*.62+coverageScore*.25+lengthScore*.13)*100;
-  const score=Math.round(Math.max(0,Math.min(100,raw))*10)/10;
+  const shapeScore=Math.max(
+    0,
+    1-shapeErr/55
+  );
+
+  const coverageScore=Math.max(
+    0,
+    1-coverageErr/55
+  );
+
+  const raw=(
+    shapeScore*.62+
+    coverageScore*.25+
+    lengthScore*.13
+  )*100;
+
+  const score=Math.round(
+    Math.max(0,Math.min(100,raw))*10
+  )/10;
+
   lastScore=score;
 
   scoreEl.textContent=score.toFixed(1)+"점";
   fill.style.width=score+"%";
+
   msg.textContent =
     score>=97 ? "거의 우주하마 본인이 그린 수준입니다!" :
     score>=90 ? "엄청 정확합니다!" :
     score>=80 ? "상당히 닮았습니다!" :
     score>=70 ? "오, 우주하마 느낌은 납니다!" :
     score>=50 ? "조금 삐뚤빼뚤하지만 우주하마입니다." :
-    "우주하마가 조금 당황했습니다…";
+    "누구세요?";
+
   result.hidden=false;
+
   saveRecord(score);
 }
 
 function saveRecord(score) {
   try {
-    const arr=JSON.parse(localStorage.getItem("hamaScores")||"[]");
-    arr.push({score,at:new Date().toISOString()});
+    const arr=JSON.parse(
+      localStorage.getItem("hamaScores")||"[]"
+    );
+
+    arr.push({
+      score,
+      at:new Date().toISOString()
+    });
+
     arr.sort((a,b)=>b.score-a.score);
-    localStorage.setItem("hamaScores",JSON.stringify(arr.slice(0,10)));
+
+    localStorage.setItem(
+      "hamaScores",
+      JSON.stringify(arr.slice(0,10))
+    );
+
     renderRecords();
+
   } catch(e) {}
 }
+
 function renderRecords() {
   let arr=[];
-  try { arr=JSON.parse(localStorage.getItem("hamaScores")||"[]"); } catch(e) {}
+
+  try {
+    arr=JSON.parse(
+      localStorage.getItem("hamaScores")||"[]"
+    );
+  } catch(e) {}
+
   recordList.innerHTML="";
+
   if(!arr.length) {
-    recordList.innerHTML='<div class="record-row"><span>아직 기록이 없습니다.</span><span>—</span></div>';
+    recordList.innerHTML=
+      '<div class="record-row"><span>아직 기록이 없습니다.</span><span>—</span></div>';
+
     return;
   }
+
   arr.slice(0,5).forEach((x,i)=>{
     const row=document.createElement("div");
+
     row.className="record-row";
-    row.innerHTML='<span>'+ (i+1) +'위</span><strong>'+Number(x.score).toFixed(1)+'점</strong>';
+
+    row.innerHTML=
+      '<span>'+ (i+1) +'위</span><strong>'+
+      Number(x.score).toFixed(1)+
+      '점</strong>';
+
     recordList.appendChild(row);
   });
 }
 
 function exportPNG() {
-  if(!strokes.length) return;
+  if(!strokes.length || lastScore === null) return;
+
   const out=document.createElement("canvas");
-  out.width=840; out.height=840;
+
+  out.width=840;
+  out.height=1040;
+
   const o=out.getContext("2d");
+
   o.fillStyle="#ffffff";
-  o.fillRect(0,0,840,840);
+  o.fillRect(
+    0,
+    0,
+    out.width,
+    out.height
+  );
+
+  o.fillStyle="#222";
+  o.textAlign="center";
+  o.font="bold 28px sans-serif";
+
+  o.fillText(
+    "🦛 HAMA DRAWING",
+    420,
+    42
+  );
+
+  o.fillStyle="#777";
+  o.font="15px sans-serif";
+
+  o.fillText(
+    "우주하마의 외곽선을 따라 그려보세요!",
+    420,
+    68
+  );
+
+  o.save();
+
+  o.translate(0,90);
+
   o.strokeStyle=penColor;
   o.lineWidth=5;
   o.lineCap="round";
   o.lineJoin="round";
+
   for(const s of strokes) {
     o.beginPath();
-    s.forEach((p,i)=>i?o.lineTo(p.x,p.y):o.moveTo(p.x,p.y));
+
+    s.forEach((p,i)=>
+      i
+        ? o.lineTo(p.x,p.y)
+        : o.moveTo(p.x,p.y)
+    );
+
     o.stroke();
   }
+
+  o.restore();
+
+  o.fillStyle="#f7f8fa";
+
+  o.beginPath();
+
+  o.roundRect(
+    40,
+    900,
+    760,
+    105,
+    16
+  );
+
+  o.fill();
+
+  o.fillStyle="#555";
+  o.font="bold 17px sans-serif";
+
+  o.fillText(
+    "우주하마 싱크로율",
+    420,
+    928
+  );
+
+  o.fillStyle="#222";
+  o.font="bold 38px sans-serif";
+
+  o.fillText(
+    Number(lastScore).toFixed(1)+"점",
+    420,
+    970
+  );
+
+  o.fillStyle="#777";
+  o.font="14px sans-serif";
+
+  const message =
+    lastScore>=97 ? "거의 우주하마 본인이 그린 수준입니다!" :
+    lastScore>=90 ? "엄청 정확합니다!" :
+    lastScore>=80 ? "상당히 닮았습니다!" :
+    lastScore>=70 ? "오, 우주하마 느낌은 납니다!" :
+    lastScore>=50 ? "조금 삐뚤빼뚤하지만 우주하마입니다." :
+    "누구세요?";
+
+  o.fillText(
+    message,
+    420,
+    994
+  );
+
   const a=document.createElement("a");
-  a.download="hama-drawing.png";
+
+  a.download="hama-drawing-result.png";
   a.href=out.toDataURL("image/png");
+
   a.click();
 }
 
 clearBtn.addEventListener("click",()=>{
-  strokes=[]; current=[]; drawing=false; lastScore=null;
-  gradeBtn.disabled=true; saveBtn.disabled=true; result.hidden=true; draw();
+  strokes=[];
+  current=[];
+  drawing=false;
+  lastScore=null;
+
+  gradeBtn.disabled=true;
+  saveBtn.disabled=true;
+  result.hidden=true;
+
+  draw();
 });
+
 gradeBtn.addEventListener("click",grade);
 saveBtn.addEventListener("click",exportPNG);
+
 canvas.addEventListener("pointerdown",down);
 canvas.addEventListener("pointermove",move);
 canvas.addEventListener("pointerup",up);
 canvas.addEventListener("pointercancel",up);
+
 renderRecords();
 draw();
+
 </script>
 </body>
 </html>
